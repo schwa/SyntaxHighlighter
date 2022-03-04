@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug SyntaxHighlighterApp",
+            "program": "${workspaceFolder:SyntaxHighlighter}/.build/debug/SyntaxHighlighterApp",
+            "args": [],
+            "cwd": "${workspaceFolder:SyntaxHighlighter}",
+            "preLaunchTask": "swift: Build Debug SyntaxHighlighterApp"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Release SyntaxHighlighterApp",
+            "program": "${workspaceFolder:SyntaxHighlighter}/.build/release/SyntaxHighlighterApp",
+            "args": [],
+            "cwd": "${workspaceFolder:SyntaxHighlighter}",
+            "preLaunchTask": "swift: Build Release SyntaxHighlighterApp"
+        }
+    ]
+}

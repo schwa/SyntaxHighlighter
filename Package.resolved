@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "everything",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/schwa/Everything",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ff01872967855cabcc9e718e48e0e45ebaa75b43"
+      }
+    },
+    {
+      "identity" : "swift-collections",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-collections.git",
+      "state" : {
+        "revision" : "48254824bb4248676bf7ce56014ff57b142b77eb",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "swift-tree-sitter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/schwa/swift-tree-sitter",
+      "state" : {
+        "branch" : "jwight/cpp_support",
+        "revision" : "943e1e4731e0e310ce33e5dba0272dbca8f52430"
+      }
+    }
+  ],
+  "version" : 2
+}
