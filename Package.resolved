@@ -6,16 +6,7 @@
       "location" : "https://github.com/schwa/Everything",
       "state" : {
         "branch" : "main",
-        "revision" : "ff01872967855cabcc9e718e48e0e45ebaa75b43"
-      }
-    },
-    {
-      "identity" : "swift-collections",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-collections.git",
-      "state" : {
-        "revision" : "48254824bb4248676bf7ce56014ff57b142b77eb",
-        "version" : "1.0.2"
+        "revision" : "24e9dbda60d98d8a1e68b3ff29cadcb7569b58da"
       }
     },
     {
