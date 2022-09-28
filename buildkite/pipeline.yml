@@ -1,5 +1,5 @@
 steps:
   - commands:
-      - "swift clean"
+      - "swift package clean"
       - "swift build"
       - "swift test --enable-code-coverage"
