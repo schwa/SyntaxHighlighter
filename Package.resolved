@@ -6,7 +6,7 @@
       "location" : "https://github.com/schwa/Everything",
       "state" : {
         "branch" : "main",
-        "revision" : "24e9dbda60d98d8a1e68b3ff29cadcb7569b58da"
+        "revision" : "8c817171ef5684bab4cc7f8b69d5547330bf8546"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/schwa/swift-tree-sitter",
       "state" : {
         "branch" : "jwight/cpp_support",
-        "revision" : "943e1e4731e0e310ce33e5dba0272dbca8f52430"
+        "revision" : "c97191312bcb097bd4762d0259a11968469cad9a"
       }
     }
   ],
