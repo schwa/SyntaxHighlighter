@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/schwa/Everything", branch: "main"),
         .package(url: "https://github.com/schwa/swift-tree-sitter", branch: "jwight/cpp_support"),
+        .package(url: "https://github.com/apple/swift-syntax", branch: "main"),
     ],
     targets: [
         .target(
@@ -22,6 +23,8 @@ let package = Package(
             dependencies: [
                 "Everything",
                 .product(name: "SwiftTreeSitter", package: "swift-tree-sitter"),
+                .product(name: "SwiftSyntax", package: "Swift-Syntax"),
+                .product(name: "SwiftParser", package: "Swift-Syntax"),
             ],
             resources: [
                 .copy("Themes/Bare.xccolortheme"),
