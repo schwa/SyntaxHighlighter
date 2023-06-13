@@ -48,10 +48,6 @@ let package = Package(
                 .copy("Themes/Sunset.xccolortheme"),
             ]
         ),
-        .executableTarget(
-            name: "SyntaxHighlighterApp",
-            dependencies: ["SyntaxHighlighter", "Everything"]
-        ),
         .testTarget(
             name: "SyntaxHighlighterTests",
             dependencies: ["SyntaxHighlighter"]
