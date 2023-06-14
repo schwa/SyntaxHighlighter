@@ -5,30 +5,72 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State
-    var text: String = #"""
-    #include <stdio.h>
-
-    int main(int argc, char **argv) {
-        printf("Hello world\n");
-    }
-    """#
+    var text: String = ""
 
     @State
     var schemeName: String = "Default (Light)"
 
+    @State
+    var type: UTType?
+
+    @State
+    var highlighter: SyntaxHighlighter?
+
     var body: some View {
-        LoadButton(allowedContentTypes: [.cPlusPlusHeader, UTType(filenameExtension: "metal")!]) { result in
-            if case let .success(url) = result {
-                self.text = try! String(contentsOf: url)
+        VStack {
+            if let highlighter {
+                SyntaxEditorView(text: $text, highlighter: highlighter)
             }
         }
-        Picker("Theme", selection: $schemeName) {
-            ForEach(Theme.BuiltIn.allCases.map(\.name), id: \.self) {
-                Text($0)
+        .toolbar {
+            LoadButton(allowedContentTypes: [.cPlusPlusHeader, UTType(filenameExtension: "metal")!, .swiftSource]) { result in
+                if case let .success(url) = result {
+                    self.text = try! String(contentsOf: url)
+                    self.type = UTType(filenameExtension: url.pathExtension)
+                }
+            }
+            Menu("Examples") {
+                Button("Swift") {
+                    self.text = #"""
+                        import Foundation
+
+                        @main
+                        struct Demo {
+                            static func main() async throws {
+                                print("hello world"
+                            }
+                        }
+
+                        """#
+                    self.type = .swiftSource
+
+                }
+
+            }
+            Picker("Theme", selection: $schemeName) {
+                ForEach(Theme.BuiltIn.allCases.map(\.name), id: \.self) {
+                    Text($0)
+                }
             }
         }
-        .padding()
-        SyntaxEditorView(text: $text)
+        .onAppear {
+            self.text = #"""
+                #include <stdio.h>
+
+                int main(int argc, char **argv) {
+                    printf("Hello world\n");
+                }
+                """#
+            self.type = .cPlusPlusSource
+        }
+        .onChange(of: type) {
+            guard let type else {
+                return
+            }
+            self.highlighter = SyntaxHighlighter(type: type)
+            print(self.highlighter)
+        }
+
     }
 }
 

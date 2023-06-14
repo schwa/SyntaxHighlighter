@@ -2,20 +2,59 @@ import AppKit
 import Foundation
 import RegexBuilder
 
+public enum Scope: String {
+    case variable = "xcode.syntax.identifier.variable"
+    case systemVariable = "xcode.syntax.identifier.variable.system"
+    case `class` = "xcode.syntax.identifier.class"
+    case `systemClass` = "xcode.syntax.identifier.class.system"
+    case comment = "xcode.syntax.comment"
+    case doc = "xcode.syntax.comment.doc"
+    case macro = "xcode.syntax.identifier.macro"
+    case macroSystem = "xcode.syntax.identifier.macro.system"
+    case string = "xcode.syntax.string"
+    case constant = "xcode.syntax.identifier.constant"
+    case systemConstant = "xcode.syntax.identifier.constant.system"
+    case otherDeclaration = "xcode.syntax.declaration.other"
+    case typeDeclaration = "xcode.syntax.declaration.type"
+    case systemTypeDeclaration = "xcode.syntax.declaration.type.system"
+    case mark = "xcode.syntax.mark"
+    case url = "xcode.syntax.url"
+    case keyword = "xcode.syntax.keyword"
+    case attribute = "xcode.syntax.attribute"
+    case number = "xcode.syntax.number"
+    case functionIdentifier = "xcode.syntax.identifier.function"
+    case functionIdentifierSystem = "xcode.syntax.identifier.function.system"
+    case functionSystem = "xcode.syntax.function.system"
+    case plain = "xcode.syntax.plain"
+    case markupAsideKind = "xcode.syntax.markup.aside.kind"
+    case character = "xcode.syntax.character"
+    case commentDocKeyword = "xcode.syntax.comment.doc.keyword"
+    case markupCode = "xcode.syntax.markup.code"
+    case typeIdentifier = "xcode.syntax.identifier.type"
+    case typeIdentifierSystem = "xcode.syntax.identifier.type.system"
+    case preprocessor = "xcode.syntax.preprocessor"
+}
+
+extension Scope: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .init(rawValue: value)!
+    }
+}
+
 public struct LanguageToScopeMap {
-    public let mapping: [(String, String)]
+    public let mapping: [(String, Scope)]
     public let ignored: Set<String>
 }
 
 public struct Theme {
     public let name: String
-    public let attributesForScope: [String: [NSAttributedString.Key: Any]]
+    public let attributesForScope: [Scope: [NSAttributedString.Key: Any]]
 
     public init(url: URL) throws {
         name = url.deletingPathExtension().lastPathComponent
         let data = try Data(contentsOf: url)
         let xcColorTheme = try PropertyListDecoder().decode(XCColorTheme.self, from: data)
-        attributesForScope = Dictionary(uniqueKeysWithValues: xcColorTheme.sourceTextSyntaxColors.map { key, color -> (String, [NSAttributedString.Key: Any]) in
+        attributesForScope = Dictionary(uniqueKeysWithValues: xcColorTheme.sourceTextSyntaxColors.map { key, color -> (Scope, [NSAttributedString.Key: Any]) in
             let font = xcColorTheme.sourceTextSyntaxFonts[key]!
             return (key, [.foregroundColor: color, .font: font])
         })
@@ -91,8 +130,8 @@ public struct XCColorTheme: Decodable {
     let sourceTextInsertionPointColor: NSColor?
     let sourceTextInvisiblesColor: NSColor?
     let sourceTextSelectionColor: NSColor?
-    let sourceTextSyntaxColors: [String: NSColor]
-    let sourceTextSyntaxFonts: [String: NSFont]
+    let sourceTextSyntaxColors: [Scope: NSColor]
+    let sourceTextSyntaxFonts: [Scope: NSFont]
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -102,8 +141,14 @@ public struct XCColorTheme: Decodable {
         sourceTextInsertionPointColor = try container.decodeIfPresent(String.self, forKey: .sourceTextInsertionPointColor).map(stringToColor)
         sourceTextInvisiblesColor = try container.decodeIfPresent(String.self, forKey: .sourceTextInvisiblesColor).map(stringToColor)
         sourceTextSelectionColor = try container.decodeIfPresent(String.self, forKey: .sourceTextSelectionColor).map(stringToColor)
-        sourceTextSyntaxColors = (try container.decodeIfPresent([String: String].self, forKey: .sourceTextSyntaxColors) ?? [:]).mapValues(stringToColor)
-        sourceTextSyntaxFonts = (try container.decodeIfPresent([String: String].self, forKey: .sourceTextSyntaxFonts) ?? [:]).mapValues(stringToFont)
+        let sourceTextSyntaxColors = (try container.decodeIfPresent([String: String].self, forKey: .sourceTextSyntaxColors) ?? [:]).mapValues(stringToColor)
+        self.sourceTextSyntaxColors = Dictionary(uniqueKeysWithValues: sourceTextSyntaxColors.map {
+            (Scope(rawValue: $0.0)!, $0.1)
+        })
+        let sourceTextSyntaxFonts = (try container.decodeIfPresent([String: String].self, forKey: .sourceTextSyntaxFonts) ?? [:]).mapValues(stringToFont)
+        self.sourceTextSyntaxFonts = Dictionary(uniqueKeysWithValues: sourceTextSyntaxFonts.map {
+            (Scope(rawValue: $0.0)!, $0.1)
+        })
     }
 }
 

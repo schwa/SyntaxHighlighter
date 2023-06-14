@@ -4,18 +4,13 @@
 
     public struct SyntaxEditorView: View {
         class Model: NSObject, ObservableObject, NSTextStorageDelegate, NSTextViewDelegate {
-            @Published
-            var text: String = ""
 
             var updateText: ((String) -> Void)?
-            var update: Bool = true
-            var syntaxHighlighter = try! SyntaxHighlighter()
+            var syntaxHighlighter: SyntaxHighlighter?
 
             func textStorage(_ textStorage: NSTextStorage, didProcessEditing _: NSTextStorageEditActions, range _: NSRange, changeInLength _: Int) {
-                if update {
-                    try! syntaxHighlighter.highlight(textStorage.string, highlighted: textStorage)
-                    updateText?(textStorage.string)
-                }
+                try! syntaxHighlighter?.highlight(textStorage.string, highlighted: textStorage, theme: .BuiltIn.defaultLight)
+                updateText?(textStorage.string)
             }
 
             func textView(_: NSTextView, willChangeSelectionFromCharacterRange _: NSRange, toCharacterRange newSelectedCharRange: NSRange) -> NSRange {
@@ -29,14 +24,22 @@
         @StateObject
         var model = Model()
 
-        public init(text: Binding<String>, highlighter: SyntaxHighlighter? = nil) {
+        let syntaxHighlighter: SyntaxHighlighter
+
+        public init(text: Binding<String>, highlighter: SyntaxHighlighter) {
             _text = text
-            if let highlighter {
-                model.syntaxHighlighter = highlighter
-            }
+            syntaxHighlighter = highlighter
         }
 
         public var body: some View {
+            textView
+            .onChange(of: syntaxHighlighter) { syntaxHighlighter in
+                model.syntaxHighlighter = syntaxHighlighter
+            }
+        }
+
+        @ViewBuilder
+        var textView: some View {
             ViewAdaptor {
                 let scrollView = NSScrollView()
                 scrollView.borderType = .noBorder
@@ -60,15 +63,13 @@
                 textView.textStorage!.delegate = model
                 textView.delegate = model
                 scrollView.documentView = textView
-
-                textView.string = text
-
+                return scrollView
+            } update: { view in
                 model.updateText = {
                     self.text = $0
                 }
+                model.syntaxHighlighter = syntaxHighlighter
 
-                return scrollView
-            } update: { view in
                 let view = view as! NSScrollView
                 guard let textView = view.documentView as? NSTextView else {
                     fatalError()

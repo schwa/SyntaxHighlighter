@@ -6,21 +6,25 @@
 
     let logger: Logger? = Logger(subsystem: "TODO", category: "TODO")
 
-    public class SyntaxHighlighter {
+public class TreeSitterSyntaxHighlighter: SyntaxHighlighterProtocol {
+
         let language: STSLanguage
         let parser: STSParser
         var tree: STSTree?
         let scopeMap: LanguageToScopeMap
-        let theme: Theme
 
-        public init(theme: Theme? = nil) throws {
+        required public init() throws {
             language = try STSLanguage(fromPreBundle: .cpp)
             parser = STSParser(language: language)
             scopeMap = cppLanguageToScopeMap
-            self.theme = try (theme ?? (try Theme(named: "Default (Light)", bundle: Bundle.module)))
         }
 
-        public func highlight(_ source: String, highlighted: NSMutableAttributedString) throws {
+        public static func == (lhs: TreeSitterSyntaxHighlighter, rhs: TreeSitterSyntaxHighlighter) -> Bool {
+            return lhs.language == rhs.language
+        }
+
+
+        public func highlight(_ source: String, highlighted: NSMutableAttributedString, theme: Theme) throws {
             guard let tree = parser.parse(string: source, oldTree: nil) else {
                 fatalError()
             }
@@ -38,7 +42,7 @@
                     return
                 }
                 guard let attributes = theme.attributesForScope[scope] else {
-                    logger?.warning("No attributes for scope \(scope)")
+                    logger?.warning("No attributes for scope.")
                     return
                 }
                 highlighted.setAttributes(attributes, range: node.range)
