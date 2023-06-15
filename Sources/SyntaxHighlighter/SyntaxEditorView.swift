@@ -17,6 +17,16 @@
                 textDidChange?(textStorage.string)
             }
 
+            func textDidChange(_ notification: Notification) {
+                guard let view = notification.object as? NSTextView, let textStorage = view.textStorage else {
+                    return
+                }
+                let selectedRanges = view.selectedRanges
+                try! syntaxHighlighter?.highlight(textStorage.string, highlighted: textStorage, theme: theme)
+                textDidChange?(textStorage.string)
+                view.selectedRanges = selectedRanges
+            }
+
             func textViewDidChangeSelection(_ notification: Notification) {
                 guard let view = notification.object as? NSTextView, let string = view.textStorage?.string else {
                     return
@@ -61,7 +71,7 @@
 
                 let textView = NSTextView()
                 textView.autoresizingMask = .width
-                textView.font = NSFont(name: "Menlo-Regular", size: 11)
+                textView.font = NSFont.monospacedSystemFont(ofSize: 13, weight: .regular)
                 textView.importsGraphics = false
                 textView.isAutomaticDashSubstitutionEnabled = false
                 textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -78,21 +88,22 @@
                 scrollView.documentView = textView
                 return scrollView
             } update: { view in
-                model.textDidChange = { text in
-                    Task {
-                        self.text = text
-                    }
-                }
-
-                model.syntaxHighlighter = SyntaxHighlighter(type: type)
-                model.theme = theme
-
-                let view = view as! NSScrollView
-                guard let textView = view.documentView as? NSTextView else {
+                guard let scrollView = view as? NSScrollView, let textView = scrollView.documentView as? NSTextView else {
                     fatalError()
                 }
-                textView.string = text
-                try! model.syntaxHighlighter?.highlight(text, highlighted: textView.textStorage!, theme: theme)
+                model.textDidChange = { text in
+                    Task {
+                        if self.text != text {
+                            self.text = text
+                        }
+                    }
+                }
+                model.syntaxHighlighter = SyntaxHighlighter(type: type)
+                model.theme = theme
+                if textView.string != text {
+                    textView.string = text
+                    try! model.syntaxHighlighter?.highlight(text, highlighted: textView.textStorage!, theme: theme)
+                }
             }
         }
     }
