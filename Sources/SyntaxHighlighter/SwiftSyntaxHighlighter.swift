@@ -5,7 +5,9 @@ import SwiftParser
 struct SwiftSyntaxHighlighter: SyntaxHighlighterProtocol {
 
     static let scopeMap: [(SyntaxEnum.Meta, Scope)] = [
-        (.structDecl, .comment)
+        (.importDecl, .keyword),
+        (.identifierExpr, .macro),
+//        (.token, .plain),
     ]
 
     func highlight(_ source: String, highlighted: NSMutableAttributedString, theme: Theme) throws {

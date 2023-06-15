@@ -1,41 +1,54 @@
 #if os(macOS)
     import SwiftUI
     // import Everything
+    import UniformTypeIdentifiers
 
     public struct SyntaxEditorView: View {
         class Model: NSObject, ObservableObject, NSTextStorageDelegate, NSTextViewDelegate {
 
-            var updateText: ((String) -> Void)?
             var syntaxHighlighter: SyntaxHighlighter?
+            var theme = Theme.BuiltIn.defaultLight
+
+            var textDidChange: ((String) -> Void)?
+            var selectionDidChange: (([Range<String.Index>]) -> Void)?
 
             func textStorage(_ textStorage: NSTextStorage, didProcessEditing _: NSTextStorageEditActions, range _: NSRange, changeInLength _: Int) {
-                try! syntaxHighlighter?.highlight(textStorage.string, highlighted: textStorage, theme: .BuiltIn.defaultLight)
-                updateText?(textStorage.string)
+                try! syntaxHighlighter?.highlight(textStorage.string, highlighted: textStorage, theme: theme)
+                textDidChange?(textStorage.string)
             }
 
-            func textView(_: NSTextView, willChangeSelectionFromCharacterRange _: NSRange, toCharacterRange newSelectedCharRange: NSRange) -> NSRange {
-                newSelectedCharRange
+            func textViewDidChangeSelection(_ notification: Notification) {
+                guard let view = notification.object as? NSTextView, let string = view.textStorage?.string else {
+                    return
+                }
+                let selection = view.selectedRanges.compactMap {
+                    Range($0.rangeValue, in: string)
+                }
+                selectionDidChange?(selection)
             }
         }
 
         @Binding
         public var text: String
 
+        @Binding
+        public var selection: [Range<String.Index>]
+
         @StateObject
         var model = Model()
 
-        let syntaxHighlighter: SyntaxHighlighter
+        let type: UTType
+        let theme: Theme
 
-        public init(text: Binding<String>, highlighter: SyntaxHighlighter) {
+        public init(text: Binding<String>, selection: Binding<[Range<String.Index>]>, type: UTType, theme: Theme) {
             _text = text
-            syntaxHighlighter = highlighter
+            _selection = selection
+            self.type = type
+            self.theme = theme
         }
 
         public var body: some View {
             textView
-            .onChange(of: syntaxHighlighter) { syntaxHighlighter in
-                model.syntaxHighlighter = syntaxHighlighter
-            }
         }
 
         @ViewBuilder
@@ -65,18 +78,21 @@
                 scrollView.documentView = textView
                 return scrollView
             } update: { view in
-                model.updateText = {
-                    self.text = $0
+                model.textDidChange = { text in
+                    Task {
+                        self.text = text
+                    }
                 }
-                model.syntaxHighlighter = syntaxHighlighter
+
+                model.syntaxHighlighter = SyntaxHighlighter(type: type)
+                model.theme = theme
 
                 let view = view as! NSScrollView
                 guard let textView = view.documentView as? NSTextView else {
                     fatalError()
                 }
-                if textView.string != text {
-                    textView.string = text
-                }
+                textView.string = text
+                try! model.syntaxHighlighter?.highlight(text, highlighted: textView.textStorage!, theme: theme)
             }
         }
     }

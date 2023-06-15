@@ -38,7 +38,7 @@ public class TreeSitterSyntaxHighlighter: SyntaxHighlighterProtocol {
                     node.path.hasSuffix(path)
                 }
                 guard let scope = result?.1 else {
-                    logger?.warning("No scope for \"\(node.path)\"")
+                    //logger?.warning("No scope for \"\(node.path, privacy: .public)\"")
                     return
                 }
                 guard let attributes = theme.attributesForScope[scope] else {

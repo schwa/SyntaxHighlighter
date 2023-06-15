@@ -33,3 +33,9 @@ extension SyntaxHighlighter: Equatable {
         lhs.type == rhs.type
     }
 }
+
+extension SyntaxHighlighter: CustomStringConvertible {
+    public var description: String {
+        return "\(type.identifier)"
+    }
+}

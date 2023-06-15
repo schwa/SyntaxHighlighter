@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "SyntaxHighlighter",
     platforms: [
-        .macOS("13"),
-        .iOS("16"),
+        .macOS("14"),
+        .iOS("17"),
     ],
     products: [
         .library(name: "SyntaxHighlighter", targets: ["SyntaxHighlighter"]),

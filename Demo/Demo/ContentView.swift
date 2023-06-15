@@ -8,25 +8,20 @@ struct ContentView: View {
     var text: String = ""
 
     @State
-    var schemeName: String = "Default (Light)"
+    var theme: Theme? = Theme.BuiltIn.defaultLight
 
     @State
-    var type: UTType?
-
-    @State
-    var highlighter: SyntaxHighlighter?
+    var type: UTType = .cPlusPlusSource
 
     var body: some View {
         VStack {
-            if let highlighter {
-                SyntaxEditorView(text: $text, highlighter: highlighter)
-            }
+            SyntaxEditorView(text: $text, selection: .constant([]), type: type, theme: theme!)
         }
         .toolbar {
             LoadButton(allowedContentTypes: [.cPlusPlusHeader, UTType(filenameExtension: "metal")!, .swiftSource]) { result in
                 if case let .success(url) = result {
                     self.text = try! String(contentsOf: url)
-                    self.type = UTType(filenameExtension: url.pathExtension)
+                    self.type = UTType(filenameExtension: url.pathExtension)!
                 }
             }
             Menu("Examples") {
@@ -40,16 +35,14 @@ struct ContentView: View {
                                 print("hello world"
                             }
                         }
-
                         """#
                     self.type = .swiftSource
-
                 }
 
             }
-            Picker("Theme", selection: $schemeName) {
-                ForEach(Theme.BuiltIn.allCases.map(\.name), id: \.self) {
-                    Text($0)
+            Picker("Theme", selection: $theme) {
+                ForEach(Theme.BuiltIn.allCases, id: \.self) {
+                    Text($0.name).tag(Optional($0))
                 }
             }
         }
@@ -63,14 +56,6 @@ struct ContentView: View {
                 """#
             self.type = .cPlusPlusSource
         }
-        .onChange(of: type) {
-            guard let type else {
-                return
-            }
-            self.highlighter = SyntaxHighlighter(type: type)
-            print(self.highlighter)
-        }
-
     }
 }
 

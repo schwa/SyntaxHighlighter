@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 import RegexBuilder
 
-public enum Scope: String {
+public enum Scope: String, Hashable {
     case variable = "xcode.syntax.identifier.variable"
     case systemVariable = "xcode.syntax.identifier.variable.system"
     case `class` = "xcode.syntax.identifier.class"
@@ -109,6 +109,17 @@ public struct Theme {
         public static let printing = try! Theme(named: "Printing", bundle: Bundle.module)
         public static let spartan = try! Theme(named: "Spartan", bundle: Bundle.module)
         public static let sunset = try! Theme(named: "Sunset", bundle: Bundle.module)
+    }
+}
+
+extension Theme: Hashable {
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.name == rhs.name
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        name.hash(into: &hasher)
     }
 }
 
