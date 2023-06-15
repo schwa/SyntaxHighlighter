@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State
-    var text: String = ""
+    var source = Source(type: .cPlusPlusSource, text: "", selection: [])
 
     @State
     var theme: Theme? = Theme.BuiltIn.defaultLight
@@ -15,18 +15,18 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            SyntaxEditorView(text: $text, selection: .constant([]), type: type, theme: theme!)
+            SyntaxEditorView(source: $source, theme: theme!)
         }
         .toolbar {
             LoadButton(allowedContentTypes: [.cPlusPlusHeader, UTType(filenameExtension: "metal")!, .swiftSource]) { result in
                 if case let .success(url) = result {
-                    self.text = try! String(contentsOf: url)
-                    self.type = UTType(filenameExtension: url.pathExtension)!
+                    self.source.text = try! String(contentsOf: url)
+                    self.source.type = UTType(filenameExtension: url.pathExtension)!
                 }
             }
             Menu("Examples") {
                 Button("Swift") {
-                    self.text = #"""
+                    self.source.text = #"""
                         import Foundation
 
                         @main
@@ -36,7 +36,7 @@ struct ContentView: View {
                             }
                         }
                         """#
-                    self.type = .swiftSource
+                    self.source.type = .swiftSource
                 }
 
             }
@@ -47,7 +47,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            self.text = #"""
+            self.source.text = #"""
                 #include <stdio.h>
 
                 int main(int argc, char **argv) {

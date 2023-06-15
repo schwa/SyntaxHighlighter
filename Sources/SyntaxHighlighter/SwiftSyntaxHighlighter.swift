@@ -4,21 +4,54 @@ import SwiftParser
 
 struct SwiftSyntaxHighlighter: SyntaxHighlighterProtocol {
 
-    static let scopeMap: [(SyntaxEnum.Meta, Scope)] = [
-        (.importDecl, .keyword),
-        (.identifierExpr, .macro),
-//        (.token, .plain),
+    static let scopeMap: [(Set<SyntaxEnum.Meta>, Scope)] = [
+        ([.importDecl], .keyword),
+        ([.identifierExpr], .macro),
+        ([.variableDecl], .variable),
+//        ([], .systemVariable),
+        ([.classDecl, .structDecl], .`class`),
+//        ([], .`systemClass`),
+//        ([], .comment),
+//        ([], .doc),
+//        ([], .macro),
+//        ([], .macroSystem),
+        ([.stringLiteralExpr], .string),
+//        ([], .constant),
+//        ([], .systemConstant),
+//        ([], .otherDeclaration),
+//        ([], .typeDeclaration),
+//        ([], .systemTypeDeclaration),
+//        ([], .mark),
+//        ([], .url),
+//        ([], .keyword),
+//        ([], .attribute),
+//        ([], .number),
+//        ([], .functionIdentifier),
+//        ([], .functionIdentifierSystem),
+//        ([], .functionSystem),
+//        ([], .plain),
+//        ([], .markupAsideKind),
+//        ([], .character),
+//        ([], .commentDocKeyword),
+//        ([], .markupCode),
+//        ([], .typeIdentifier),
+//        ([], .typeIdentifierSystem),
+//        ([], .preprocessor),
     ]
+
+    
 
     func highlight(_ source: String, highlighted: NSMutableAttributedString, theme: Theme) throws {
         let root = Parser.parse(source: source)
+
+        highlighted.setAttributes(theme.attributesForScope[.plain], range: NSRange(location: 0, length: highlighted.string.count))
 
         root.walk { syntax, _ in
             guard let syntax = syntax.as(Syntax.self) else {
                 fatalError()
             }
             let type = SyntaxEnum.Meta(syntax.as(SyntaxEnum.self))
-            guard let scope = Self.scopeMap.first(where: { $0.0 == type })?.1 else {
+            guard let scope = Self.scopeMap.first(where: { $0.0.contains(type) })?.1 else {
                 return
             }
             guard let attributes = theme.attributesForScope[scope] else {
